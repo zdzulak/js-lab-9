@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Object Prototypes | COMP1073 Client-Side JavaScript</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link href="css/normalize.css" rel="stylesheet" />
+	<link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<body>
+	<h1>Inheritance in JavaScript</h1>
+	<p>Let's put JavaScript prototypes and inheritance to work – with <em>coffee</em>.</p>
+	<p id="output"></p>
+
+	<script>
+		var output = document.getElementById('output');
+
+		/* STEP 1: Review the below constructor function, 'Coffee' */
+		function Coffee(size, isDecaf, qtyCream, qtySugar) {
+			// size should be 'large', 'medium', or 'small'
+			this.size = size;
+			// isDecaf is boolean
+			this.isDecaf = isDecaf;
+			// qtyCream and qtySugar are integers
+			this.qtyCream = qtyCream;
+			this.qtySugar = qtySugar;
+			// Use a ternary operator to determine whether the coffee is decaf
+			this.decaf = (this.isDecaf === true ? 'decaffeinated' : 'caffeinated');
+			// Describe the coffee
+			this.description = 'A ' + this.size + ' ' + this.decaf + ' coffee with ' + this.qtyCream + ' cream and ' + this.qtySugar + ' sugar.';
+		}
+
+		/* STEP 2: Observe how the method 'serveIt' is defined on the constructor's prototype. */
+		Coffee.prototype.serveIt = function() {
+			// Generate an IMG element of the appropriate size, with the object's description as the title attribute value
+			var cup = document.createElement("img");
+			cup.setAttribute('title', this.description);
+			cup.setAttribute('src', 'images/coffee-cup.svg');
+			var cupSize;
+			switch (this.size) {
+				case 'small' :
+					cupSize = '100px';
+					break;
+				case 'medium' :
+					cupSize = '125px';
+					break;
+				case 'large' :
+					cupSize = '150px';
+					break;
+				default :
+					cupSize = '100px';
+			}
+			// Size the SVG in terms of it's height based on this.size
+			cup.setAttribute('height', cupSize);
+			// Insert the new IMG element with src, title, and height attributes all set into the paragraph
+			output.appendChild(cup);
+		}
+
+		/* STEP 2a: Instatiate a coffee based on the above constructor function */
+		var myCoffee = new Coffee('large', false, 2, 1);
+		/* STEP 2b: Call up the serveIt() method */
+		myCoffee.serveIt();
+
+		/* STEP 3: Build a new constructor based on Coffee … Latte */
+		function Latte(size, isDecaf, qtyCream, qtySugar, milkType) {
+			Coffee.call(this, size, isDecaf, qtyCream, qtySugar);
+			// milkType should be either 'skim', '2%', or 'whole'
+			this.milkType = milkType;
+			// Describe the latte
+			this.description = 'A ' + this.size + ' ' + this.decaf + ' latte made with ' + this.milkType + ' steamed milk.';
+		}
+		// Note that we use 'call' to call the Coffee constructor function but in the current context
+
+		/* STEP 4a: We have a problem - the Latte constructor's prototype isn't inheriting the methods from the Coffee constructor. Try the following in the console:
+			Coffee.prototype.serveIt
+			Latte.prototype.serveIt
+		*/
+
+		/* STEP 4b: Get Latte() to inherit the methods defined on Coffee()'s prototype. */
+		Latte.prototype = Object.create(Coffee.prototype);
+		// Try Latte.prototype.serveIt again in the console
+
+		/* STEP 4c: Ensure that the new Latte object's constructor property isn't equal to Coffee, but rather to it's own, and inheriting from Coffee. See this by typing in the console, 'Latte.prototype.constructor'. Confusing, yes. */
+		Latte.prototype.constructor = Latte;
+
+		/* STEP 6a: Give Latte a new serveIt() function. Copy the above serveIt() method, but change the cup sizes and set the src to 'images/coffee-cup-green.svg'. */
+		Latte.prototype.serveIt = function() {
+			// Generate an IMG element of the appropriate size, with the object's description as the title attribute value
+			var cup = document.createElement("img");
+			cup.setAttribute('title', this.description);
+			cup.setAttribute('src', 'images/coffee-cup-green.svg');
+			var cupSize;
+			switch (this.size) {
+				case 'small' :
+					cupSize = '75px';
+					break;
+				case 'medium' :
+					cupSize = '100px';
+					break;
+				case 'large' :
+					cupSize = '125px';
+					break;
+				default :
+					cupSize = '75px';
+			}
+			// Size the SVG in terms of it's height based on this.size
+			cup.setAttribute('height', cupSize);
+			// Insert the new IMG element with src, title, and height attributes all set into the paragraph
+			output.appendChild(cup);
+		}
+
+
+		/* STEP 5a: Create an instance of Latte */
+		var myLatte = new Latte('medium', false, 0, 1, '2%');
+		/* STEP 5b: Call up the serveIt() method */
+		myLatte.serveIt();
+
+		/* STEP 6b: Create another new instance of Latte, and serveIt() */
+		var yourLatte = new Latte('large', true, 0, 2, 'whole');
+		yourLatte.serveIt();
+
+
+		// Creating a new Espresso object based off of the Coffee object
+
+		function Espresso(size, isDecaf, qtyCream, qtySugar, powder) {
+			Coffee.call(this, size, isDecaf, qtyCream, qtySugar);
+			// powder can be "cinnamon" or "choclate"
+			this.powder = powder;
+			// Describing the espresso
+			this.description = 'A ' + this.size + ' ' + this.decaf + ' espresso made with ' + this.powder + ' powder.';
+		}
+
+		Espresso.prototype = Object.create(Coffee.prototype);
+		Espresso.prototype.constructor = Espresso;
+
+		Espresso.prototype.serveIt = function() {
+			// Generate an IMG element of the appropriate size, with the object's description as the title attribute value
+			var cup = document.createElement("img");
+			cup.setAttribute('title', this.description);
+			cup.setAttribute('src', 'images/coffee-cup-purple.svg');
+			var cupSize;
+			switch (this.size) {
+				case 'small' :
+					cupSize = '75px';
+					break;
+				case 'medium' :
+					cupSize = '100px';
+					break;
+				case 'large' :
+					cupSize = '125px';
+					break;
+				default :
+					cupSize = '75px';
+			}
+			// Size the SVG in terms of it's height based on this.size
+			cup.setAttribute('height', cupSize);
+			// Insert the new IMG element with src, title, and height attributes all set into the paragraph
+			output.appendChild(cup);
+		}
+
+		var firstEspresso = new Espresso('small', false, 1, 1, 'choclate');
+		firstEspresso.serveIt();
+
+		// This page inspired by and adapted from https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Inheritance
+
+		// Special thanks to https://openclipart.org/detail/293550/coffee-to-go for the very cool coffee cup SVG
+		</script>
+	</body>
+</html>
